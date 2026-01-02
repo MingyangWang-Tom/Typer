@@ -2,6 +2,8 @@
 
 A modern, minimalist typing practice website built with Next.js and Tailwind CSS, inspired by Monkeytype.
 
+**Live Demo**: [typer.mingyangwang.dev](https://typer.mingyangwang.dev)
+
 ## Features
 
 - **Dynamic Typing Engine**: Real-time feedback with character highlighting (correct/incorrect/extra).
