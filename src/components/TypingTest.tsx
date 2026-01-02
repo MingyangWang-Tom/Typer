@@ -56,20 +56,13 @@ export default function TypingTest() {
   }, []);
 
   useEffect(() => {
-    if (startTime && !isFinished && timeLeft > 0) {
+    if (startTime && !isFinished) {
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
-            const finalTimeLeft = 0;
-            setIsFinished(true);
-            
-            // Calculate final stats immediately when finished by timer
-            const wpmVal = Math.round((correctChars / 5) / (timeLimit / 60));
-            setWpm(wpmVal);
-            setAccuracy(totalChars > 0 ? Math.round((correctChars / totalChars) * 100) : 100);
-
             if (timerRef.current) clearInterval(timerRef.current);
-            return finalTimeLeft;
+            setIsFinished(true);
+            return 0;
           }
           return prev - 1;
         });
@@ -78,7 +71,16 @@ export default function TypingTest() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [startTime, isFinished, timeLeft, timeLimit, correctChars, totalChars]);
+  }, [startTime, isFinished]);
+
+  // Update stats when finished
+  useEffect(() => {
+    if (isFinished) {
+      const wpmVal = Math.round((correctChars / 5) / (timeLimit / 60));
+      setWpm(wpmVal);
+      setAccuracy(totalChars > 0 ? Math.round((correctChars / totalChars) * 100) : 100);
+    }
+  }, [isFinished, correctChars, totalChars, timeLimit]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -121,10 +123,6 @@ export default function TypingTest() {
     // End if reached the end of text
     if (value.length === targetText.length) {
       setIsFinished(true);
-      // Calculate final stats immediately when finished by completing all words
-      const wpmVal = Math.round((correctChars / 5) / (timeLimit / 60));
-      setWpm(wpmVal);
-      setAccuracy(totalChars > 0 ? Math.round((correctChars / totalChars) * 100) : 100);
     }
   };
 
