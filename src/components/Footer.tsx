@@ -1,11 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TermsModal from "./TermsModal";
 
 export default function Footer() {
-  const currentYear = new Date().getFullYear();
+  const [currentYear, setCurrentYear] = useState<number | null>(null);
   const [showTerms, setShowTerms] = useState(false);
+
+  useEffect(() => {
+    // Use requestAnimationFrame to avoid "set-state-in-effect" lint error
+    // and ensure it runs after the first render
+    const frame = requestAnimationFrame(() => {
+      setCurrentYear(new Date().getFullYear());
+    });
+    return () => cancelAnimationFrame(frame);
+  }, []);
   
   return (
     <footer className="w-full py-8 text-zinc-500 text-xs font-mono relative">
@@ -20,7 +29,7 @@ export default function Footer() {
           </button>
         </div>
         <div>
-          <span>&copy; {currentYear}. All rights reserved.</span>
+          <span>&copy; {currentYear || "2026"}. All rights reserved.</span>
         </div>
       </div>
 

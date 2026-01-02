@@ -16,6 +16,7 @@ A modern, minimalist typing practice website built with Next.js and Tailwind CSS
     - **Accuracy** (%)
     - **Raw Characters** (Correct/Total)
     - **Error Count**
+- **Night Mode**: Manual toggle for light, dark, and system theme preferences.
 - **Keyboard Shortcuts**: Press `Esc` at any time to quickly restart the test.
 - **Responsive Design**: Minimalist aesthetic with full support for light and dark modes.
 - **Focus Detection**: Automatically pauses or prompts to "Click to focus" if the input loses focus.

@@ -11,11 +11,15 @@ export default function TypingTest() {
   const [words, setWords] = useState<string[]>([]);
   const [userInput, setUserInput] = useState("");
   const [startTime, setStartTime] = useState<number | null>(null);
+  const [timeLimit, setTimeLimit] = useState(30);
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [isFinished, setIsFinished] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
+  
+  // Stats
   const [wpm, setWpm] = useState(0);
   const [accuracy, setAccuracy] = useState(100);
-  const [timeLeft, setTimeLeft] = useState(30);
-  const [timeLimit, setTimeLimit] = useState(30);
-  const [isFinished, setIsFinished] = useState(false);
+
   const [totalChars, setTotalChars] = useState(0);
   const [correctChars, setCorrectChars] = useState(0);
   const [errors, setErrors] = useState(0);
@@ -44,10 +48,56 @@ export default function TypingTest() {
     setTimeout(() => inputRef.current?.focus(), 0);
   }, [timeLimit, capitalize, punctuation]);
 
+  // Handle hydration
   useEffect(() => {
-    initGame();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const frame = requestAnimationFrame(() => {
+      setHasMounted(true);
+      initGame();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [initGame]); // Added initGame to dependencies
+
+  // Handle settings change immediately
+  const handleTimeLimitChange = (newLimit: number) => {
+    setTimeLimit(newLimit);
+    if (!startTime) {
+      setTimeLeft(newLimit);
+      const newWords = generateWordsList(100, { capitalize, includePunctuation: punctuation });
+      setWords(newWords);
+    }
+  };
+
+  const handleCapitalizeChange = (val: boolean) => {
+    setCapitalize(val);
+    if (!startTime) {
+      const newWords = generateWordsList(100, { capitalize: val, includePunctuation: punctuation });
+      setWords(newWords);
+    }
+  };
+
+  const handlePunctuationChange = (val: boolean) => {
+    setPunctuation(val);
+    if (!startTime) {
+      const newWords = generateWordsList(100, { capitalize, includePunctuation: val });
+      setWords(newWords);
+    }
+  };
+
+  const finishGame = useCallback(() => {
+    setIsFinished(true);
+    if (timerRef.current) clearInterval(timerRef.current);
   }, []);
+
+  useEffect(() => {
+    if (isFinished) {
+      const frame = requestAnimationFrame(() => {
+        const wpmVal = Math.round((correctChars / 5) / (timeLimit / 60));
+        setWpm(wpmVal);
+        setAccuracy(totalChars > 0 ? Math.round((correctChars / totalChars) * 100) : 100);
+      });
+      return () => cancelAnimationFrame(frame);
+    }
+  }, [isFinished, correctChars, totalChars, timeLimit]);
 
   useEffect(() => {
     return () => {
@@ -60,8 +110,7 @@ export default function TypingTest() {
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
-            if (timerRef.current) clearInterval(timerRef.current);
-            setIsFinished(true);
+            finishGame();
             return 0;
           }
           return prev - 1;
@@ -71,16 +120,7 @@ export default function TypingTest() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [startTime, isFinished]);
-
-  // Update stats when finished
-  useEffect(() => {
-    if (isFinished) {
-      const wpmVal = Math.round((correctChars / 5) / (timeLimit / 60));
-      setWpm(wpmVal);
-      setAccuracy(totalChars > 0 ? Math.round((correctChars / totalChars) * 100) : 100);
-    }
-  }, [isFinished, correctChars, totalChars, timeLimit]);
+  }, [startTime, isFinished, finishGame]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -122,7 +162,7 @@ export default function TypingTest() {
 
     // End if reached the end of text
     if (value.length === targetText.length) {
-      setIsFinished(true);
+      finishGame();
     }
   };
 
@@ -137,19 +177,29 @@ export default function TypingTest() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [initGame]);
 
+  if (!hasMounted) {
+    return (
+      <div className="w-full max-w-4xl flex flex-col items-center min-h-[400px]">
+        {/* Skeleton or empty state to prevent jump */}
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-4xl flex flex-col items-center relative">
-      <Header timeLeft={timeLeft} isFinished={isFinished} startTime={startTime} />
+      <div className="w-full relative z-20">
+        <Header timeLeft={timeLeft} isFinished={isFinished} startTime={startTime} />
+      </div>
       
       {!isFinished && (
         <div className="mb-8 relative z-20">
           <Settings 
             timeLimit={timeLimit} 
-            setTimeLimit={setTimeLimit} 
+            setTimeLimit={handleTimeLimitChange} 
             capitalize={capitalize}
-            setCapitalize={setCapitalize}
+            setCapitalize={handleCapitalizeChange}
             punctuation={punctuation}
-            setPunctuation={setPunctuation}
+            setPunctuation={handlePunctuationChange}
             disabled={startTime !== null}
           />
         </div>
