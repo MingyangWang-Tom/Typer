@@ -11,7 +11,7 @@ export default function Footer() {
     <footer className="w-full py-8 text-zinc-500 text-xs font-mono relative">
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 max-w-4xl mx-auto px-4">
         <div className="flex items-center gap-6">
-          <a href="#" className="hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors">Github</a>
+          <a href="https://github.com/MingyangWang-Tom" className="hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors">Github</a>
           <button 
             onClick={() => setShowTerms(true)}
             className="hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors cursor-pointer"
@@ -20,7 +20,7 @@ export default function Footer() {
           </button>
         </div>
         <div>
-          <span>&copy; {currentYear} Typer. All rights reserved.</span>
+          <span>&copy; {currentYear}. All rights reserved.</span>
         </div>
       </div>
 
