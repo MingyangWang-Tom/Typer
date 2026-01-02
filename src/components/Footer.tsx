@@ -1,0 +1,30 @@
+"use client";
+
+import { useState } from "react";
+import TermsModal from "./TermsModal";
+
+export default function Footer() {
+  const currentYear = new Date().getFullYear();
+  const [showTerms, setShowTerms] = useState(false);
+  
+  return (
+    <footer className="w-full py-8 text-zinc-500 text-xs font-mono relative">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 max-w-4xl mx-auto px-4">
+        <div className="flex items-center gap-6">
+          <a href="#" className="hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors">Github</a>
+          <button 
+            onClick={() => setShowTerms(true)}
+            className="hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+          >
+            Terms
+          </button>
+        </div>
+        <div>
+          <span>&copy; {currentYear} Typer. All rights reserved.</span>
+        </div>
+      </div>
+
+      <TermsModal isOpen={showTerms} onClose={() => setShowTerms(false)} />
+    </footer>
+  );
+}
